@@ -1,0 +1,98 @@
+table 'ecommerce_sales_data (2)'
+	lineageTag: c0807b8b-c7be-4786-ac44-9c25e697c38f
+
+	measure 'TOTAL Profit' = SUM('ecommerce_sales_data (2)'[Profit])
+		lineageTag: 9080fa5a-10fe-43be-ac72-0908a2b804eb
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure 'Profit Margin' = DIVIDE(SUM('ecommerce_sales_data (2)'[Profit]),SUM('ecommerce_sales_data (2)'[Sales]))*100
+		lineageTag: bbe1aae8-ee38-4be4-ad0d-1ffebd0f62d0
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	measure AVGPROFIT = AVERAGE('ecommerce_sales_data (2)'[Profit])
+		lineageTag: ef8a2f02-2ae9-4f60-ba22-bf245f5a2cf8
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column 'Order Date'
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b6df3d03-8fb4-4f69-9568-3ab4eef949b3
+		summarizeBy: none
+		sourceColumn: Order Date
+
+		variation Variation
+			isDefault
+			relationship: 11e2869c-822e-4e7d-a46d-cc4eece9dc60
+			defaultHierarchy: LocalDateTable_8cc87946-f4fd-41a8-9f34-719a9d872755.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column 'Product Name'
+		dataType: string
+		lineageTag: 1f102501-a7b5-49c1-82e5-06517a6fba8f
+		summarizeBy: none
+		sourceColumn: Product Name
+
+		annotation SummarizationSetBy = Automatic
+
+	column Category
+		dataType: string
+		lineageTag: 7d8a4b9c-db78-4b68-a3dd-85c9c3ab88f4
+		summarizeBy: none
+		sourceColumn: Category
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 1fd6baf6-3c45-4e6c-a9c0-f97a1fec6358
+		summarizeBy: none
+		sourceColumn: Region
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 99367b72-1ea9-4e26-b2d3-f411facffa4f
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		annotation SummarizationSetBy = Automatic
+
+	column Sales
+		dataType: int64
+		formatString: 0
+		lineageTag: 66ea4af8-e7cf-4666-8272-aeb3fc3f2be0
+		summarizeBy: sum
+		sourceColumn: Sales
+
+		annotation SummarizationSetBy = Automatic
+
+	column Profit
+		dataType: double
+		lineageTag: 7f38743e-e769-405c-9500-633b7689cec5
+		summarizeBy: sum
+		sourceColumn: Profit
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition 'ecommerce_sales_data (2)' = m
+		mode: import
+		source =
+				let
+				    Source = Csv.Document(File.Contents("C:\Users\KIIT\Downloads\archive\ecommerce_sales_data (2).csv"),[Delimiter=",", Columns=7, Encoding=1252, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"Order Date", type date}, {"Product Name", type text}, {"Category", type text}, {"Region", type text}, {"Quantity", Int64.Type}, {"Sales", Int64.Type}, {"Profit", type number}})
+				in
+				    #"Changed Type"
+
+	annotation PBI_ResultType = Table
+
